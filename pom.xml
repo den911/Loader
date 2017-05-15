@@ -26,6 +26,12 @@
 
     <dependencies>
 
+        <dependency>
+            <groupId>org.tarantool</groupId>
+            <artifactId>connector</artifactId>
+            <version>1.7.2</version>
+        </dependency>
+
         <!--SPRING-->
         <dependency>
             <groupId>org.springframework.boot</groupId>
