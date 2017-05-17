@@ -10,15 +10,13 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.PropertySource;
 import org.springframework.core.env.Environment;
 import org.tarantool.SocketChannelProvider;
+import org.tarantool.TarantoolClient;
 import org.tarantool.TarantoolClientConfig;
+import org.tarantool.TarantoolClientImpl;
 
 import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.nio.channels.SocketChannel;
-
-/**
- * Created by ddyakin on 14.05.17.
- */
 
 @Configuration
 @ComponentScan("ru.ddyakin")
@@ -50,6 +48,10 @@ public class SpringConfig implements EnvironmentAware {
         };
     }
 
+    @Bean
+    TarantoolClient tarantoolClient() {
+        return new TarantoolClientImpl(channelProvider(), tarantoolConfig());
+    }
 
     @Override
     public void setEnvironment(Environment environment) {
