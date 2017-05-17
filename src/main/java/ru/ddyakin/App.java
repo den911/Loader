@@ -9,10 +9,6 @@ import org.springframework.boot.builder.SpringApplicationBuilder;
 import org.springframework.boot.web.support.SpringBootServletInitializer;
 import org.springframework.context.annotation.ComponentScan;
 
-/**
- * Created by ddyakin on 14.05.17.
- */
-
 @SpringBootApplication
 @EnableAutoConfiguration
 @ComponentScan
