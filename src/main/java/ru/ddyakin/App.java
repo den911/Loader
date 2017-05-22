@@ -8,10 +8,12 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.builder.SpringApplicationBuilder;
 import org.springframework.boot.web.support.SpringBootServletInitializer;
 import org.springframework.context.annotation.ComponentScan;
+import org.springframework.context.annotation.ImportResource;
 
 @SpringBootApplication
 @EnableAutoConfiguration
 @ComponentScan
+@ImportResource("classpath:spring.xml")
 public class App extends SpringBootServletInitializer {
     private static final Logger log = LoggerFactory.getLogger(App.class);
 
