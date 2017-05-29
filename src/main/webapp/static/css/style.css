@@ -1,0 +1,25 @@
+.table-text-align-center td, .table-text-align-center th {
+    text-align: center;
+}
+
+.started .date, .finished .date {
+    font-style: italic;
+    font-size: 85%;
+}
+
+.infoLink {
+    font-weight: bold;
+}
+
+.rl-button {
+    width: 150px;
+    margin: 0px 0px 3px !important;
+}
+
+.rl-label-td {
+    width: 150px;
+}
+
+.rl-label {
+    width: 150px;
+}
