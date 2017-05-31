@@ -1,0 +1,42 @@
+
+
+
+Spaces:
+    <spaceName>sKey - list of keys of space;
+    spaces - list of spaces;
+
+Configurations:
+
+s = box.schema.space.create('profilesKey')
+p = s:create_index('primary', {type = 'hash', parts = {1, 'unsigned'}, if_not_exists})
+
+s = box.schema.space.create('profile')
+p = s:create_index('primary', {type = 'hash', parts = {1, 'unsigned'}, if_not_exists = true})
+s:create_index('secondary', {
+            type = 'hash',
+            unique = false,
+            parts = {1, 'NUM'}
+           if_not_exists = true
+          })
+s:create_index('secondary', {
+            type = 'hash',
+            unique = true,
+            parts = {1, 'unsigned'}
+            if_not_exists = true
+          })
+s:create_index('secondary', {
+            type = 'hash',
+            unique = false,
+            parts = {1, 'string'}
+            if_not_exists = true
+          })
+
+
+s = box.schema.space.create('profile', {if_not_exists = true})
+p = s:create_index('primary', {type = 'hash', parts = {1, 'unsigned'}, if_not_exists = true})
+s:create_index('secondary', { type = 'tree', unique = false, parts = {1, 'unsigned'}, if_not_exists = true})
+s:create_index('secondary', { type = 'tree', unique = true, parts = {1, 'unsigned'}, if_not_exists = true})s:create_index('secondary', { type = 'tree', unique = false, parts = {1, 'string'}, if_not_exists = true})
+
+
+
+box.schema.space_config:auto_increment{'s = box.schema.space.create(\'profile\', {if_not_exists = true}) p = s:create_index(\'primary\', {type = \'hash\', parts = {1, \'unsigned\'}, if_not_exists = true}) s:create_index(\'secondary\', { type = \'tree\', unique = false, parts = {1, \'unsigned\'}, if_not_exists = true}) s:create_index(\'secondary\', { type = \'tree\', unique = true, parts = {1, \'unsigned\'}, if_not_exists = true}) s:create_index(\'secondary\', { type = \'tree\', unique = false, parts = {1, \'string\'}, if_not_exists = true})'}

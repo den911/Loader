@@ -1,0 +1,14 @@
+{
+  "name" : "profile",
+  "type" : "hash",
+  "keys" : [
+    {
+      "keyType" : "unsigned",
+      "unique" : 1
+    },
+    {
+      "keyType" : "string",
+      "unique" : 0
+    }
+  ]
+}

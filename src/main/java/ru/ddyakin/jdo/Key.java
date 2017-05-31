@@ -1,8 +1,12 @@
 package ru.ddyakin.jdo;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
+
 public class Key {
 
+    @JsonProperty("keyType")
     private String key;
+    @JsonProperty("unique")
     private Boolean unique;
 
     public Key() {

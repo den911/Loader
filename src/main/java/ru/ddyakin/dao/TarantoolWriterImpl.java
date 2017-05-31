@@ -3,6 +3,7 @@ package ru.ddyakin.dao;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.tarantool.TarantoolClientImpl;
 import ru.ddyakin.jdo.*;
@@ -16,8 +17,8 @@ public class TarantoolWriterImpl implements TarantoolWriterDao {
 
     private final static String STATUS_OK = "Ok";
 
-    private final static Set<String> SET_OF_KEY_TYPE = new HashSet<>(Arrays.asList("hash", "tree", "BITSET", "RTREE"));
-    private final static Set<String> SET_OF_P_KEY_TYPE = new HashSet<>(Arrays.asList("NUM", "string", "", ""));
+    private final static Set<String> SET_OF_KEY_TYPE = new HashSet<>(Arrays.asList("hash", "tree", "bitset", "rtree"));
+    private final static Set<String> SET_OF_P_KEY_TYPE = new HashSet<>(Arrays.asList("unsigned", "string", "", ""));
 
     private ShardedTarantoolTemplateManager templateManager;
 
@@ -29,20 +30,21 @@ public class TarantoolWriterImpl implements TarantoolWriterDao {
     }
 
     public String processStructRequest(Struct request) {
-        String status = null;
-        status = validateStruct(request);
+        String status = validateStruct(request);
         if (status.equals(STATUS_OK)) {
             final StringBuilder spaceKeyConfig = new StringBuilder();
 
             spaceKeyConfig.append("s = box.schema.space.create('")
                     .append(request.getSpaceName())
-                    .append("sKey')\n")
-                    .append("p = s:create_index('primary', {type = 'hash', parts = {1, 'NUM'}, if_not_exists = true})\n");
+                    .append("sKey', {if_not_exists = true})\n")
+                    .append("p = s:create_index('primary', {type = 'hash', parts = {1, 'unsigned'}, if_not_exists = true})\n");
             StringBuilder spaceConfig = createStructure(templateManager.masterTemplate, request);
 
             templateManager.masterTemplate.syncOps().eval(spaceKeyConfig.toString());
-            templateManager.masterTemplate.syncOps().eval("box.schema.space_config:auto_increment{"+spaceConfig.toString()+"}");
-            templateManager.masterTemplate.syncOps().eval("box.schema.spaces:auto_increment{"+request.getSpaceName()+"}");
+            String spaceC = StringUtils.replace(spaceConfig.toString(), "'", "\\'");
+            spaceC = StringUtils.replace(spaceC, "\n", " ");
+            templateManager.masterTemplate.syncOps().eval("box.space.spaces_config:auto_increment{'"+spaceC+"'}");
+            templateManager.masterTemplate.syncOps().eval("box.space.spaces:auto_increment{"+request.getSpaceName()+"}");
         }
         return status;
     }
@@ -52,24 +54,24 @@ public class TarantoolWriterImpl implements TarantoolWriterDao {
 
         spaceConfig.append("s = box.schema.space.create('")
                 .append(structure.getSpaceName())
-                .append("')\n")
-                .append("p = s:create_index('primary', {type = 'hash', parts = {1, 'NUM'}, if_not_exists = true})\n")
-                .append("s:create_index('secondary', {\n")
-                .append("         >   type = 'hash',\n")
-                .append("         >   unique = false,\n")
-                .append("         >   parts = {1, 'NUM'}\n")
-                .append("         >   if_not_exists = true")
-                .append("         > })");
+                .append("', {if_not_exists = true})\n")
+                .append("p = s:create_index('primary', {type = 'hash', parts = {1, 'unsigned'}, if_not_exists = true})\n")
+                .append("s:create_index('secondary', {")
+                .append(" type = 'tree',")
+                .append(" unique = false,")
+                .append(" parts = {1, 'unsigned'},")
+                .append(" if_not_exists = true")
+                .append("})\n");
 
         if (structure.getKeys() != null && !structure.getKeys().isEmpty())
             structure.getKeys().forEach(key ->{
-                if (SET_OF_P_KEY_TYPE.contains(key))
-                    spaceConfig.append("\ns:create_index('secondary', {\n" +
-                            "         >   type = 'hash',\n" +
-                            "         >   unique = false,\n" +
-                            "         >   parts = {1, '" + key + "'}\n" +
-                            "         >   if_not_exists = true" +
-                            "         > })");
+                if (SET_OF_P_KEY_TYPE.contains(key.getKey()))
+                    spaceConfig.append("s:create_index('secondary', {" +
+                            " type = 'tree'," +
+                            " unique = "+ key.getUnique().toString() +"," +
+                            " parts = {1, '" + key.getKey() + "'}," +
+                            " if_not_exists = true" +
+                            "})\n");
             });
 
         template.syncOps().eval(spaceConfig.toString());
@@ -144,12 +146,10 @@ public class TarantoolWriterImpl implements TarantoolWriterDao {
 //        return makeShardKey(keysForShard);
 //    }
 
-
+    @Autowired
     public void setTemplateManager(ShardedTarantoolTemplateManager templateManager) {
         this.templateManager = templateManager;
     }
-
-
 
 //    private String validateStruct(Struct struct) {
 //        final String[] status = new String[1];
