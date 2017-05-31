@@ -8,5 +8,5 @@ s = box.schema.space.create('spaces')
 p = s:create_index('primary', {type = 'tree', parts = {1, 'unsigned'}})
 
 s = box.schema.space.create('spaces_config')
-p = s:create_index('primary', {type = 'tree', parts = {1, 'unsigned'}})
+p = s:create_index('primary', {type = 'tree', parts = {1, 'unsigned', 2, 'string'}})
 

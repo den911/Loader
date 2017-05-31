@@ -24,5 +24,4 @@ public class ClusterController {
             log.error("err ", ex);
         }
     }
-
 }

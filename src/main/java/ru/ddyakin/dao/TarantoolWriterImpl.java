@@ -41,8 +41,8 @@ public class TarantoolWriterImpl implements TarantoolWriterDao {
             StringBuilder spaceConfig = createStructure(templateManager.masterTemplate, request);
 
             templateManager.masterTemplate.syncOps().eval(spaceKeyConfig.toString());
-            String spaceC = StringUtils.replace(spaceConfig.toString(), "'", "\\'");
-            spaceC = StringUtils.replace(spaceC, "\n", " ");
+            String spaceC = StringUtils.replace(spaceConfig.toString(), "\n", " ");
+            spaceC = "'"+request.getSpaceName()+"', " + spaceC;
             templateManager.masterTemplate.syncOps().eval("box.space.spaces_config:auto_increment{'"+spaceC+"'}");
             templateManager.masterTemplate.syncOps().eval("box.space.spaces:auto_increment{"+request.getSpaceName()+"}");
         }
