@@ -8,8 +8,4 @@
         <constructor-arg name="clusterConfig" value="classpath:${tarantool.cluster.path}"/>
     </bean>
 
-    <bean id="tarantoolWriter" class="ru.ddyakin.dao.TarantoolWriterImpl">
-        <constructor-arg name="templateManager" ref="templateManager" />
-    </bean>
-
 </beans>

@@ -27,11 +27,11 @@ public class ShardedTarantoolTemplateManager {
     private static final Logger log = LoggerFactory.getLogger(ShardedTarantoolTemplateManager.class);
 
     private NodeInspector inspector;
-    public TarantoolClient[] shardedTemplates;
+    public TarantoolClientImpl[] shardedTemplates;
     public TarantoolClientImpl masterTemplate;
     private TarantoolClientConfig commonConfig;
 
-    public ShardedTarantoolTemplateManager(TarantoolClient[] shardedTemplates, TarantoolClientImpl masterTemplate) {
+    public ShardedTarantoolTemplateManager(TarantoolClientImpl[] shardedTemplates, TarantoolClientImpl masterTemplate) {
         this.shardedTemplates = shardedTemplates;
         this.masterTemplate = masterTemplate;
     }
@@ -44,7 +44,7 @@ public class ShardedTarantoolTemplateManager {
             log.error("Failed to load properties.", e);
         }
         int shards = Integer.valueOf(properties.getProperty("tarantool.shards.number"));
-        shardedTemplates = new TarantoolClient[shards - 1];
+        shardedTemplates = new TarantoolClientImpl[shards - 1];
         TarantoolClientConfig config = initTarantoolClusterConfig(properties);
         SocketChannelProvider[] providers = initProviders(properties, shards);
         masterTemplate = new TarantoolClientImpl(providers[0], config);
@@ -72,8 +72,8 @@ public class ShardedTarantoolTemplateManager {
                     return SocketChannel.open(new InetSocketAddress(props.getProperty("tarantool.node."+ k +".host"),
                             Integer.valueOf(props.getProperty("tarantool.node." + k +".port"))));
                 } catch (IOException e) {
+                    this.inspector = new NodeInspector(getShards() - 1);
                     throw new IllegalStateException(e);
-                    //todo restart node
                 }
             };
         }
@@ -88,7 +88,7 @@ public class ShardedTarantoolTemplateManager {
         return shardedTemplates[index];
     }
 
-    public TarantoolClient getShardTemplate(String shardStr) {
+    public TarantoolClientImpl getShardTemplate(String shardStr) {
         return shardedTemplates[chooseShard(shardStr)];
     }
 
@@ -119,10 +119,7 @@ public class ShardedTarantoolTemplateManager {
             log.info(status);
             return status;
         }
-        NodeInspector lastIns = null;
-        while (inspector.getPreviousInspector() != null) {
-            lastIns = inspector.getPreviousInspector();
-        }
+        NodeInspector lastIns = getLastInspector(inspector);
         shardedTemplates = Arrays.copyOf(shardedTemplates, shardedTemplates.length + urls.length);
         int k = 0;
         for (String url :
@@ -203,4 +200,15 @@ public class ShardedTarantoolTemplateManager {
         log.info("resharding is done");
     }
 
+    public NodeInspector getInspector() {
+        return inspector;
+    }
+
+    public NodeInspector getLastInspector(NodeInspector inspector) {
+        NodeInspector lastIns = inspector;
+        while (inspector.getPreviousInspector() != null) {
+            lastIns = inspector.getPreviousInspector();
+        }
+        return lastIns;
+    }
 }

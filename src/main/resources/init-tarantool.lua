@@ -7,3 +7,6 @@ box.schema.user.grant('test', 'execute,read,write', 'universe')
 s = box.schema.space.create('spaces')
 p = s:create_index('primary', {type = 'tree', parts = {1, 'NUM'}})
 
+s = box.schema.space.create('spaces_config')
+p = s:create_index('primary', {type = 'hash', parts = {1, 'NUM'}})
+
