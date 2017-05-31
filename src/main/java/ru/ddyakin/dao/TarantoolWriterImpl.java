@@ -44,7 +44,7 @@ public class TarantoolWriterImpl implements TarantoolWriterDao {
             String spaceC = StringUtils.replace(spaceConfig.toString(), "'", "\\'");
             spaceC = StringUtils.replace(spaceC, "\n", " ");
             templateManager.masterTemplate.syncOps().eval("box.space.spaces_config:auto_increment{'"+ request.getSpaceName() +"','"+spaceC+"'}");
-            templateManager.masterTemplate.syncOps().eval("box.space.spaces:auto_increment{"+request.getSpaceName()+"}");
+            templateManager.masterTemplate.syncOps().eval("box.space.spaces:auto_increment{'"+request.getSpaceName()+"'}");
         }
         return status;
     }
@@ -86,8 +86,19 @@ public class TarantoolWriterImpl implements TarantoolWriterDao {
         return STATUS_OK;
     }
 
+    private String validateWriteRequest(WriteRequest request) {
+        List spaces = templateManager.getSpaces();
+        if (StringUtils.isEmpty(request.getName()))
+            return "space name is empty!";
+        return STATUS_OK;
+    }
+
     @Override
     public WriteResponse processWrite(WriteRequest request) {
+        String status = validateWriteRequest(request);
+        if (status.equals(STATUS_OK)) {
+
+        }
         return null;
     }
 
